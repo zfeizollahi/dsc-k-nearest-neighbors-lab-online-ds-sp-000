@@ -1,4 +1,3 @@
-
 # K-Nearest Neighbors - Lab
 
 ## Introduction
@@ -31,7 +30,14 @@ You will now:
 
 ```python
 # Define the KNN class with two empty methods - fit and predict
-
+class KNN:
+#     def __init__(self):
+#         pass
+    def fit(self):
+        pass
+    
+    def predict(self):
+        pass
 ```
 
 ## Comple the `fit()` method
@@ -48,8 +54,10 @@ In the cell below, complete the `fit` method:
 
 
 ```python
-def fit():
-    pass
+def fit(self, X_train, y_train):
+    self.X_train = X_train
+    self.y_train = y_train
+    #pass
     
 # This line updates the knn.fit method to point to the function you've just written
 KNN.fit = fit
@@ -70,8 +78,12 @@ In the cell below, complete the `_get_distances()` function. This function shoul
 
 
 ```python
-def _get_distances():
-    pass
+def _get_distances(self, x):
+    distances = []
+    for ind, val in enumerate(self.X_train):
+        d = euclidean(x, val)
+        distances.append((ind, d))
+    return distances
 
 # This line attaches the function you just created as a method to KNN class 
 KNN._get_distances = _get_distances
@@ -90,8 +102,9 @@ Well done! You will now create a `_get_k_nearest()` function to retrieve indices
 
 
 ```python
-def _get_k_nearest():
-    pass
+def _get_k_nearest(self, dists, k):
+    dists_sorted = sorted(dists, key=lambda x: x[1])
+    return dists_sorted[:k]
 
 # This line attaches the function you just created as a method to KNN class 
 KNN._get_k_nearest = _get_k_nearest
@@ -107,8 +120,10 @@ Complete the `_get_label_prediction()` function in the cell below. This function
 
 
 ```python
-def _get_label_prediction():
-    pass
+def _get_label_prediction(self, k_nearest):
+    labels = [self.y_train[i] for i, _ in k_nearest]
+    label_counts = np.bincount(labels)
+    return np.argmax(label_counts)
 
 # This line attaches the function you just created as a method to KNN class
 KNN._get_label_prediction = _get_label_prediction
@@ -134,8 +149,13 @@ Follow these instructions to complete the `predict()` method in the cell below:
 
 
 ```python
-def predict():
-    pass
+def predict(self, X_test, k=3):
+    predictions = []
+    for x in X_test:
+        dist = self._get_distances(x)
+        k_nearest = self._get_k_nearest(dist, k)
+        predictions.append(self._get_label_prediction(k_nearest))
+    return predictions
 
 # This line updates the knn.predict method to point to the function you've just written
 KNN.predict = predict
@@ -156,18 +176,20 @@ Note that there are **_3 classes_** in the Iris dataset, making this a multi-cat
 
 ```python
 # Import the necessary functions
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-
-iris = None
-data = None
-target = None
+iris = load_iris()
+data = iris.data
+target = iris.target
 ```
 
 Use `train_test_split()` to split the data into training and test sets. Pass in the `data` and `target`, and set the `test_size` to 0.25 and `random_state` to 0. 
 
 
 ```python
-X_train, X_test, y_train, y_test = None
+X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.25, random_state=0)
 ```
 
 Now, instantiate the `KNN` class, and `fit` it to the data in `X_train` and the labels in `y_train`.
@@ -175,8 +197,8 @@ Now, instantiate the `KNN` class, and `fit` it to the data in `X_train` and the 
 
 ```python
 # Instantiate and fit KNN
-knn = None
-
+knn = KNN()
+knn.fit(X_train, y_train)
 ```
 
 In the cell below, use the `.predict()` method to generate predictions for the data stored in `X_test`: 
@@ -184,16 +206,31 @@ In the cell below, use the `.predict()` method to generate predictions for the d
 
 ```python
 # Generate predictions
-preds = None
+preds = knn.predict(X_test)
 ```
+
+
+```python
+len(X_test), len(y_test), len(X_train), len(y_train), len(preds)
+```
+
+
+
+
+    (38, 38, 112, 112, 38)
+
+
 
 Finally, the moment of truth! Test the accuracy of your predictions. In the cell below, complete the call to `accuracy_score()` by passing in `y_test` and `preds`! 
 
 
 ```python
-print("Testing Accuracy: {}".format(accuracy_score(None, None)))
+print("Testing Accuracy: {}".format(accuracy_score(y_test, preds)))
 # Expected Output: Testing Accuracy: 0.9736842105263158
 ```
+
+    Testing Accuracy: 0.9736842105263158
+
 
 Over 97% accuracy! Not bad for a handwritten machine learning classifier!
 
